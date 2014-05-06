@@ -60,27 +60,25 @@ int main(int argc, char *argv[])
     QString PlainMessage = QString::fromStdString(messagebuffer);
     int plainTextSize = messagebuffer.length();
 
-    string plain="RSA Encryption", cipher, recovered;
+    string plain=messagebuffer, cipher, recovered;
 
-    ////////////////////////////////////////////////
-    // Encryption
+
     RSAES_OAEP_SHA_Encryptor e(rsaPublic);
 
     StringSource ss1(plain, true,
         new PK_EncryptorFilter(rnd, e,
             new StringSink(cipher)
-       ) // PK_EncryptorFilter
-    ); // StringSource
+       )
+    );
 
-    ////////////////////////////////////////////////
-    // Decryption
+
     RSAES_OAEP_SHA_Decryptor d(rsaPrivate);
 
     StringSource ss2(cipher, true,
         new PK_DecryptorFilter(rnd, d,
             new StringSink(recovered)
-       ) // PK_DecryptorFilter
-    ); // StringSource
+       )
+    );
 
     cout << "Recovered plain text" << endl;
     }
