@@ -46,37 +46,44 @@ int main(int argc, char *argv[])
     //string str("C:/Qt/Tools/QtCreator/bin/QTTestingSSLEncryption/CryptoChatDER.key");
     //CryptoPP::RSA::PrivateKey prkey;
     //LoadKey(str, prkey);
+    cout << "Automatically generating a random number from random number pool" << endl;
     CryptoPP::AutoSeededRandomPool rnd;
+    cout << "Creating a private key based on an integer length and the random number obtained" << endl;
     CryptoPP::RSA::PrivateKey rsaPrivate;
     rsaPrivate.GenerateRandomWithKeySize(rnd, 3072);
 
+    cout << "Creating public key utilising the previously created private key" << endl;
     CryptoPP::RSA::PublicKey rsaPublic(rsaPrivate);
 
+    cout << "Storing the private key for future use" << endl;
     SavePrivateKey("CryptoChatRSA.key", rsaPrivate);
+    cout << "Storing the public key for future use" << endl;
     SavePublicKey("CryptoChatPubRSA.key", rsaPublic);
 
     cout << "Please enter a message to encrypt" << endl;
     cin >> messagebuffer;
+    cout << "Converting QString to plaintext" << endl;
     QString PlainMessage = QString::fromStdString(messagebuffer);
+    cout << "Obtaining length of string to ensure encryption of full text" << endl;
     int plainTextSize = messagebuffer.length();
 
     string plain=messagebuffer, cipher, recovered;
 
+    cout << "Encrypting plaintext" << endl;
+    CryptoPP::RSAES_OAEP_SHA_Encryptor e(rsaPublic);
 
-    RSAES_OAEP_SHA_Encryptor e(rsaPublic);
-
-    StringSource ss1(plain, true,
-        new PK_EncryptorFilter(rnd, e,
-            new StringSink(cipher)
+    CryptoPP::StringSource ss1(plain, true,
+        new CryptoPP::PK_EncryptorFilter(rnd, e,
+            new CryptoPP::StringSink(cipher)
        )
     );
 
+    cout << "Decrypting ciphertext" << endl;
+    CryptoPP::RSAES_OAEP_SHA_Decryptor d(rsaPrivate);
 
-    RSAES_OAEP_SHA_Decryptor d(rsaPrivate);
-
-    StringSource ss2(cipher, true,
-        new PK_DecryptorFilter(rnd, d,
-            new StringSink(recovered)
+    CryptoPP::StringSource ss2(cipher, true,
+        new CryptoPP::PK_DecryptorFilter(rnd, d,
+            new CryptoPP::StringSink(recovered)
        )
     );
 
